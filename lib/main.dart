@@ -6,11 +6,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:to_do_list/data.dart';
 import 'package:to_do_list/edit.dart';
 
-
 const taskBoxName = 'tasks';
 const Color primaryColor = Color(0xff794CFF);
 const Color primaryVariantColor = Color(0xff5C0AFF);
 final secondaryTextColor = const Color(0xffAFBED0);
+const normalPriority = Color(0xffF09819);
+const highPriority = Color(0xff794CFF);
+const lowPriority = Color(0xff3BE1F1);
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(TaskAdapter());
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
           onSecondary: Colors.white,
         ),
         textTheme: GoogleFonts.poppinsTextTheme(
-            TextTheme(headline6: TextStyle(fontWeight: FontWeight.bold))),
+            const TextTheme(headline6: TextStyle(fontWeight: FontWeight.bold))),
       ),
       home: const HomeScreen(),
     );
@@ -71,15 +73,17 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EditTaskScreen( task: TaskEntity(),),
+              builder: (context) => EditTaskScreen(
+                task: TaskEntity(),
+              ),
             ),
           );
         },
-        label: Row(
+        label: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text('Add New Task'),
+            Text('Add New Task'),
             Icon(
               CupertinoIcons.add,
               size: 20,
@@ -150,7 +154,7 @@ class HomeScreen extends StatelessWidget {
                 valueListenable: box.listenable(),
                 builder: (context, box, child) {
                   return ListView.builder(
-                    physics: BouncingScrollPhysics(),
+                    physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                     itemCount: box.values.length + 1,
                     itemBuilder: (context, index) {
@@ -216,6 +220,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 class TaskItem extends StatefulWidget {
+  final double height = 84;
   const TaskItem({
     super.key,
     required this.task,
@@ -230,6 +235,18 @@ class TaskItem extends StatefulWidget {
 class _TaskItemState extends State<TaskItem> {
   @override
   Widget build(BuildContext context) {
+    final priorityColor;
+    switch (widget.task.priority) {
+      case Priority.normal:
+        priorityColor = normalPriority;
+        break;
+      case Priority.low:
+        priorityColor = lowPriority;
+        break;
+      case Priority.high:
+        priorityColor = highPriority;
+        break;
+    }
     ThemeData themeData = Theme.of(context);
     return InkWell(
       onTap: () {
@@ -238,8 +255,8 @@ class _TaskItemState extends State<TaskItem> {
         });
       },
       child: Container(
-        margin: EdgeInsets.only(top: 8),
-        padding: EdgeInsets.only(left: 16, right: 16),
+        margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.only(left: 16, right: 16),
         height: 84,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -254,7 +271,7 @@ class _TaskItemState extends State<TaskItem> {
         child: Row(
           children: [
             MyCheckBox(value: widget.task.isComplited),
-            SizedBox(
+            const SizedBox(
               width: 16,
             ),
             Expanded(
@@ -269,6 +286,13 @@ class _TaskItemState extends State<TaskItem> {
                         : null),
               ),
             ),
+            Container(
+              decoration: BoxDecoration(
+                color: priorityColor,
+              ),
+              width: 4,
+              height: 84,
+            )
           ],
         ),
       ),
@@ -301,6 +325,3 @@ class MyCheckBox extends StatelessWidget {
     );
   }
 }
-
-
-

@@ -31,7 +31,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         onPressed: () {
           final task = TaskEntity();
           task.name = _controller.text;
-          task.priority = Priority.low;
+          task.priority = widget.task.priority;
           if (task.isInBox) {
             task.save();
           } else {
@@ -40,7 +40,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           }
           Navigator.of(context).pop();
         },
-        label: Row(
+        label: const Row(
           children: [
             Text('Save changes'),
             SizedBox(
@@ -64,7 +64,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                   flex: 1,
                   child: PriorityCheckBox(
                     lable: 'High',
-                    color: themeData.primaryColor,
+                    color: highPriority,
                     isSelected: widget.task.priority == Priority.high,
                     onTap: () {
                       setState(
@@ -75,14 +75,14 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                     },
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 8,
                 ),
                 Flexible(
                   flex: 1,
                   child: PriorityCheckBox(
                     lable: 'Normal',
-                    color: Color(0xffF09819),
+                    color: normalPriority,
                     isSelected: widget.task.priority == Priority.normal,
                     onTap: () {
                       setState(() {
@@ -91,14 +91,14 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                     },
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 8,
                 ),
                 Flexible(
                   flex: 1,
                   child: PriorityCheckBox(
                     lable: 'Low',
-                    color: Color(0xff3BE1F1),
+                    color: lowPriority,
                     isSelected: widget.task.priority == Priority.low,
                     onTap: () {
                       setState(() {
