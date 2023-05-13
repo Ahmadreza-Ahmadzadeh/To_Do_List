@@ -4,8 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:to_do_list/data.dart';
+import 'package:to_do_list/edit.dart';
+
 
 const taskBoxName = 'tasks';
+const Color primaryColor = Color(0xff794CFF);
+const Color primaryVariantColor = Color(0xff5C0AFF);
+final secondaryTextColor = const Color(0xffAFBED0);
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(TaskAdapter());
@@ -16,10 +21,6 @@ void main() async {
   );
   runApp(const MyApp());
 }
-
-const Color primaryColor = Color(0xff794CFF);
-const Color primaryVariantColor = Color(0xff5C0AFF);
-final secondaryTextColor = const Color(0xffAFBED0);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -70,7 +71,7 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EditTaskScreen(),
+              builder: (context) => EditTaskScreen( task: TaskEntity(),),
             ),
           );
         },
@@ -111,8 +112,11 @@ class HomeScreen extends StatelessWidget {
                           style: themeData.textTheme.headline6!
                               .apply(color: Colors.white),
                         ),
-                        Icon(CupertinoIcons.share,
-                            color: themeData.colorScheme.onPrimary),
+                        Image.asset(
+                          'assets/share.png',
+                          height: 30,
+                          width: 30,
+                        ),
                       ],
                     ),
                     const SizedBox(
@@ -298,41 +302,5 @@ class MyCheckBox extends StatelessWidget {
   }
 }
 
-class EditTaskScreen extends StatelessWidget {
-  final TextEditingController _controller = TextEditingController();
 
-  EditTaskScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Task'),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          final task = TaskEntity();
-          task.name = _controller.text;
-          task.priority = Priority.low;
-          if (task.isInBox) {
-            task.save();
-          } else {
-            final Box<TaskEntity> box = Hive.box(taskBoxName);
-            box.add(task);
-          }
-          Navigator.of(context).pop();
-        },
-        label: const Text('Save changes'),
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _controller,
-            decoration: const InputDecoration(
-              label: Text('Add Task for today ...'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+
