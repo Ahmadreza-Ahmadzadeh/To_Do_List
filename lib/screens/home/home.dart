@@ -256,7 +256,7 @@ class _TaskItemState extends State<TaskItem> {
         final taskRepository =
             Provider.of<Repository<TaskEntity>>(context, listen: false);
         taskRepository.delete(widget.task);
-      },
+      }, 
       child: Container(
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.only(left: 16, right: 16),

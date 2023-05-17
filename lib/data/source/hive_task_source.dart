@@ -35,7 +35,7 @@ class HiveTaskDataSource implements DataSource<TaskEntity> {
   Future<TaskEntity> findById(id) async {
     return box.values.firstWhere((element) => element.id == id);
   }
-
+ 
   @override
   Future<List<TaskEntity>> getAll({String searchKeyword = ''}) async {
     if (searchKeyword.isNotEmpty) {

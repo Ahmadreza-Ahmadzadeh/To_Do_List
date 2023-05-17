@@ -45,7 +45,7 @@ class MyCheckBox extends StatelessWidget {
           border:
               value ? null : Border.all(color: secondaryTextColor, width: 2),
           color: value ? primaryColor : null,
-        ),
+        ), 
         child: value
             ? Icon(
                 CupertinoIcons.check_mark,

@@ -11,7 +11,7 @@ class TaskEntity extends HiveObject {
   bool isComplited = false;
   @HiveField(2)
   Priority priority = Priority.low;
-}
+} 
 
 @HiveType(typeId: 2)
 enum Priority {

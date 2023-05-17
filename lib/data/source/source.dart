@@ -6,3 +6,4 @@ abstract class DataSource<T> {
   Future<void> deleteById(dynamic id);
   Future<T> createOrUpdate(T data);
 }
+ 

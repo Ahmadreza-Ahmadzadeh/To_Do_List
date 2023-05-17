@@ -10,7 +10,7 @@ class TaskAdapter extends TypeAdapter<TaskEntity> {
   @override
   final int typeId = 1;
 
-  @override
+  @override 
   TaskEntity read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{

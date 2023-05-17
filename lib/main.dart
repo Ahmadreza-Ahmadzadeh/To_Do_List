@@ -15,7 +15,7 @@ const secondaryTextColor = Color(0xffAFBED0);
 const normalPriority = Color(0xffF09819);
 const highPriority = Color(0xff794CFF);
 const lowPriority = Color(0xff3BE1F1);
-void main() async {
+void main() async { 
   await Hive.initFlutter();
   Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(PriorityAdapter());
