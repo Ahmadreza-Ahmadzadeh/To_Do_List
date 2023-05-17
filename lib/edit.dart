@@ -6,14 +6,15 @@ import 'package:to_do_list/main.dart';
 
 class EditTaskScreen extends StatefulWidget {
   final TaskEntity task;
-  EditTaskScreen({super.key, required this.task});
+  const EditTaskScreen({super.key, required this.task});
 
   @override
   State<EditTaskScreen> createState() => _EditTaskScreenState();
 }
 
 class _EditTaskScreenState extends State<EditTaskScreen> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.task.name);
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +30,13 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          final task = TaskEntity();
-          task.name = _controller.text;
-          task.priority = widget.task.priority;
-          if (task.isInBox) {
-            task.save();
+          widget.task.name = _controller.text;
+          widget.task.priority = widget.task.priority;
+          if (widget.task.isInBox) {
+            widget.task.save();
           } else {
             final Box<TaskEntity> box = Hive.box(taskBoxName);
-            box.add(task);
+            box.add(widget.task);
           }
           Navigator.of(context).pop();
         },
@@ -63,15 +63,13 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 Flexible(
                   flex: 1,
                   child: PriorityCheckBox(
-                    lable: 'High',
-                    color: highPriority,
-                    isSelected: widget.task.priority == Priority.high,
+                    lable: 'Low',
+                    color: lowPriority,
+                    isSelected: widget.task.priority == Priority.low,
                     onTap: () {
-                      setState(
-                        () {
-                          widget.task.priority = Priority.high;
-                        },
-                      );
+                      setState(() {
+                        widget.task.priority = Priority.low;
+                      });
                     },
                   ),
                 ),
@@ -97,13 +95,15 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 Flexible(
                   flex: 1,
                   child: PriorityCheckBox(
-                    lable: 'Low',
-                    color: lowPriority,
-                    isSelected: widget.task.priority == Priority.low,
+                    lable: 'High',
+                    color: highPriority,
+                    isSelected: widget.task.priority == Priority.high,
                     onTap: () {
-                      setState(() {
-                        widget.task.priority = Priority.low;
-                      });
+                      setState(
+                        () {
+                          widget.task.priority = Priority.high;
+                        },
+                      );
                     },
                   ),
                 ),
@@ -176,7 +176,7 @@ class PriorityCheckBox extends StatelessWidget {
 class _CheckBoxShape extends StatelessWidget {
   final bool value;
   final Color color;
-  const _CheckBoxShape({super.key, required this.value, required this.color});
+  const _CheckBoxShape({required this.value, required this.color});
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
