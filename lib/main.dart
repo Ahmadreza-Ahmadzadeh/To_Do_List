@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:to_do_list/data.dart';
@@ -153,63 +154,69 @@ class HomeScreen extends StatelessWidget {
               child: ValueListenableBuilder<Box<TaskEntity>>(
                 valueListenable: box.listenable(),
                 builder: (context, box, child) {
-                  return ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                    itemCount: box.values.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Today',
-                                    style: themeData.textTheme.headline6!
-                                        .apply(fontSizeFactor: 0.9),
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 4),
-                                    width: 70,
-                                    height: 3,
-                                    decoration: BoxDecoration(
-                                        color: primaryColor,
-                                        borderRadius:
-                                            BorderRadius.circular(1.5)),
-                                  )
-                                ],
-                              ),
-                              MaterialButton(
-                                color: const Color(0xffEAEFF5),
-                                elevation: 0,
-                                textColor: secondaryTextColor,
-                                onPressed: () {
-                                },
-                                child: const Row(
+                  if (box.isNotEmpty) {
+                    return ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                      itemCount: box.values.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Delet All'),
-                                    SizedBox(
-                                      width: 4,
+                                    Text(
+                                      'Today',
+                                      style: themeData.textTheme.headline6!
+                                          .apply(fontSizeFactor: 0.9),
                                     ),
-                                    Icon(
-                                      CupertinoIcons.delete_solid,
-                                      size: 18,
-                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4),
+                                      width: 70,
+                                      height: 3,
+                                      decoration: BoxDecoration(
+                                          color: primaryColor,
+                                          borderRadius:
+                                              BorderRadius.circular(1.5)),
+                                    )
                                   ],
                                 ),
-                              )
-                            ],
-                          ),
-                        );
-                      } else {
-                        final TaskEntity task = box.values.toList()[index - 1];
-                        return TaskItem(task: task);
-                      }
-                    },
-                  );
+                                MaterialButton(
+                                  color: const Color(0xffEAEFF5),
+                                  elevation: 0,
+                                  textColor: secondaryTextColor,
+                                  onPressed: () {
+                                    box.clear();
+                                  },
+                                  child: const Row(
+                                    children: [
+                                      Text('Delet All'),
+                                      SizedBox(
+                                        width: 4,
+                                      ),
+                                      Icon(
+                                        CupertinoIcons.delete_solid,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        } else {
+                          final TaskEntity task =
+                              box.values.toList()[index - 1];
+                          return TaskItem(task: task);
+                        }
+                      },
+                    );
+                  } else {
+                    return EmptyState();
+                  }
                 },
               ),
             ),
@@ -335,6 +342,24 @@ class MyCheckBox extends StatelessWidget {
               )
             : null,
       ),
+    );
+  }
+}
+
+class EmptyState extends StatelessWidget {
+  const EmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SvgPicture.asset('assets/empty_state.svg',width: 170,),
+        SizedBox(
+          height: 12,
+        ),
+        Text('Your task is empty',style: TextStyle(fontSize: 17),)
+      ],
     );
   }
 }
