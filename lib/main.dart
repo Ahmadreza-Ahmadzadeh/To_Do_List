@@ -264,6 +264,9 @@ class _TaskItemState extends State<TaskItem> {
           ),
         );
       },
+      onLongPress: () {
+        widget.task.delete();
+      },
       child: Container(
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.only(left: 16, right: 16),
@@ -354,11 +357,17 @@ class EmptyState extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SvgPicture.asset('assets/empty_state.svg',width: 170,),
+        SvgPicture.asset(
+          'assets/empty_state.svg',
+          width: 170,
+        ),
         SizedBox(
           height: 12,
         ),
-        Text('Your task is empty',style: TextStyle(fontSize: 17),)
+        Text(
+          'Your task is empty',
+          style: TextStyle(fontSize: 17),
+        )
       ],
     );
   }
