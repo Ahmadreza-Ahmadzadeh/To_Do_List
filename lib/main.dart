@@ -10,7 +10,7 @@ import 'package:to_do_list/edit.dart';
 const taskBoxName = 'tasks';
 const Color primaryColor = Color(0xff794CFF);
 const Color primaryVariantColor = Color(0xff5C0AFF);
-final secondaryTextColor = const Color(0xffAFBED0);
+const secondaryTextColor = Color(0xffAFBED0);
 const normalPriority = Color(0xffF09819);
 const highPriority = Color(0xff794CFF);
 const lowPriority = Color(0xff3BE1F1);
@@ -31,23 +31,24 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final primaryTextColor = const Color(0xff1D2830);
+    const primaryTextColor = Color(0xff1D2830);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'To_Do_List',
       theme: ThemeData(
-        inputDecorationTheme: InputDecorationTheme(
+        inputDecorationTheme: const InputDecorationTheme(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
           labelStyle: TextStyle(
             color: secondaryTextColor,
           ),
           iconColor: secondaryTextColor,
           border: InputBorder.none,
         ),
-        colorScheme: ColorScheme.light(
+        colorScheme: const ColorScheme.light(
           primary: primaryColor,
           primaryVariant: primaryVariantColor,
-          background: const Color(0xffF3F5F8),
+          background: Color(0xffF3F5F8),
           onBackground: primaryTextColor,
           onSurface: primaryTextColor,
           secondary: primaryColor,
@@ -56,14 +57,15 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(
             const TextTheme(headline6: TextStyle(fontWeight: FontWeight.bold))),
       ),
-      home: const HomeScreen(),
+      home: HomeScreen(),
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
+  HomeScreen({super.key});
+  final TextEditingController controller = TextEditingController();
+  final ValueNotifier<String> searchKeywordNotifier = ValueNotifier('');
   @override
   Widget build(BuildContext context) {
     final box = Hive.box<TaskEntity>(taskBoxName);
@@ -139,8 +141,12 @@ class HomeScreen extends StatelessWidget {
                           )
                         ],
                       ),
-                      child: const TextField(
-                        decoration: InputDecoration(
+                      child: TextField(
+                        controller: controller,
+                        onChanged: (value) {
+                          searchKeywordNotifier.value = controller.text;
+                        },
+                        decoration: const InputDecoration(
                           prefixIcon: Icon(CupertinoIcons.search),
                           label: Text('Search tasks ...'),
                         ),
@@ -151,72 +157,91 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ValueListenableBuilder<Box<TaskEntity>>(
-                valueListenable: box.listenable(),
-                builder: (context, box, child) {
-                  if (box.isNotEmpty) {
-                    return ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                      itemCount: box.values.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return Container(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: ValueListenableBuilder<String>(
+                valueListenable: searchKeywordNotifier,
+                builder: (
+                  context,
+                  value,
+                  child,
+                ) {
+                  return ValueListenableBuilder<Box<TaskEntity>>(
+                    valueListenable: box.listenable(),
+                    builder: (context, box, child) {
+                      final List<TaskEntity> items;
+                      if (controller.text.isEmpty) {
+                        items = box.values.toList();
+                      } else {
+                        items = box.values
+                            .where(
+                                (task) => task.name.contains(controller.text))
+                            .toList();
+                      }
+                      if (items.isNotEmpty) {
+                        return ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                          itemCount: items.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Container(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      'Today',
-                                      style: themeData.textTheme.headline6!
-                                          .apply(fontSizeFactor: 0.9),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Today',
+                                          style: themeData.textTheme.headline6!
+                                              .apply(fontSizeFactor: 0.9),
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 4),
+                                          width: 70,
+                                          height: 3,
+                                          decoration: BoxDecoration(
+                                              color: primaryColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(1.5)),
+                                        )
+                                      ],
                                     ),
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4),
-                                      width: 70,
-                                      height: 3,
-                                      decoration: BoxDecoration(
-                                          color: primaryColor,
-                                          borderRadius:
-                                              BorderRadius.circular(1.5)),
+                                    MaterialButton(
+                                      color: const Color(0xffEAEFF5),
+                                      elevation: 0,
+                                      textColor: secondaryTextColor,
+                                      onPressed: () {
+                                        box.clear();
+                                      },
+                                      child: const Row(
+                                        children: [
+                                          Text('Delet All'),
+                                          SizedBox(
+                                            width: 4,
+                                          ),
+                                          Icon(
+                                            CupertinoIcons.delete_solid,
+                                            size: 18,
+                                          ),
+                                        ],
+                                      ),
                                     )
                                   ],
                                 ),
-                                MaterialButton(
-                                  color: const Color(0xffEAEFF5),
-                                  elevation: 0,
-                                  textColor: secondaryTextColor,
-                                  onPressed: () {
-                                    box.clear();
-                                  },
-                                  child: const Row(
-                                    children: [
-                                      Text('Delet All'),
-                                      SizedBox(
-                                        width: 4,
-                                      ),
-                                      Icon(
-                                        CupertinoIcons.delete_solid,
-                                        size: 18,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                          );
-                        } else {
-                          final TaskEntity task =
-                              box.values.toList()[index - 1];
-                          return TaskItem(task: task);
-                        }
-                      },
-                    );
-                  } else {
-                    return EmptyState();
-                  }
+                              );
+                            } else {
+                              final TaskEntity task = items.toList()[index - 1];
+                              return TaskItem(task: task);
+                            }
+                          },
+                        );
+                      } else {
+                        return const EmptyState();
+                      }
+                    },
+                  );
                 },
               ),
             ),
@@ -361,10 +386,10 @@ class EmptyState extends StatelessWidget {
           'assets/empty_state.svg',
           width: 170,
         ),
-        SizedBox(
+        const SizedBox(
           height: 12,
         ),
-        Text(
+        const Text(
           'Your task is empty',
           style: TextStyle(fontSize: 17),
         )

@@ -6,14 +6,15 @@ import 'package:to_do_list/main.dart';
 
 class EditTaskScreen extends StatefulWidget {
   final TaskEntity task;
-   const EditTaskScreen({super.key, required this.task});
+  const EditTaskScreen({super.key, required this.task});
 
   @override
   State<EditTaskScreen> createState() => _EditTaskScreenState();
 }
 
 class _EditTaskScreenState extends State<EditTaskScreen> {
-  late final TextEditingController _controller = TextEditingController(text: widget.task.name);
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.task.name);
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +176,7 @@ class PriorityCheckBox extends StatelessWidget {
 class _CheckBoxShape extends StatelessWidget {
   final bool value;
   final Color color;
-  const _CheckBoxShape({super.key, required this.value, required this.color});
+  const _CheckBoxShape({required this.value, required this.color});
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
