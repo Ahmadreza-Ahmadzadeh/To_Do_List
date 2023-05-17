@@ -186,7 +186,8 @@ class HomeScreen extends StatelessWidget {
                                 color: const Color(0xffEAEFF5),
                                 elevation: 0,
                                 textColor: secondaryTextColor,
-                                onPressed: () {},
+                                onPressed: () {
+                                },
                                 child: const Row(
                                   children: [
                                     Text('Delet All'),
@@ -250,14 +251,16 @@ class _TaskItemState extends State<TaskItem> {
     ThemeData themeData = Theme.of(context);
     return InkWell(
       onTap: () {
-        setState(() {
-          widget.task.isComplited = !widget.task.isComplited;
-        });
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => EditTaskScreen(task: widget.task),
+          ),
+        );
       },
       child: Container(
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.only(left: 16, right: 16),
-        height: 84,
+        height: 74,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: themeData.colorScheme.surface,
@@ -270,7 +273,14 @@ class _TaskItemState extends State<TaskItem> {
         ),
         child: Row(
           children: [
-            MyCheckBox(value: widget.task.isComplited),
+            MyCheckBox(
+              value: widget.task.isComplited,
+              onTap: () {
+                setState(() {
+                  widget.task.isComplited = !widget.task.isComplited;
+                });
+              },
+            ),
             const SizedBox(
               width: 16,
             ),
@@ -280,7 +290,6 @@ class _TaskItemState extends State<TaskItem> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontSize: 24,
                     decoration: widget.task.isComplited
                         ? TextDecoration.lineThrough
                         : null),
@@ -302,26 +311,30 @@ class _TaskItemState extends State<TaskItem> {
 
 class MyCheckBox extends StatelessWidget {
   final bool value;
-
-  const MyCheckBox({super.key, required this.value});
+  final GestureTapCallback onTap;
+  const MyCheckBox({super.key, required this.value, required this.onTap});
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: value ? null : Border.all(color: secondaryTextColor, width: 2),
-        color: value ? primaryColor : null,
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border:
+              value ? null : Border.all(color: secondaryTextColor, width: 2),
+          color: value ? primaryColor : null,
+        ),
+        child: value
+            ? Icon(
+                CupertinoIcons.check_mark,
+                color: themeData.colorScheme.onPrimary,
+                size: 16,
+              )
+            : null,
       ),
-      child: value
-          ? Icon(
-              CupertinoIcons.check_mark,
-              color: themeData.colorScheme.onPrimary,
-              size: 16,
-            )
-          : null,
     );
   }
 }
