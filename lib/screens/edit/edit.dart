@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:to_do_list/data.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do_list/data/data.dart';
+import 'package:to_do_list/data/repo/repository.dart';
 import 'package:to_do_list/main.dart';
 
 class EditTaskScreen extends StatefulWidget {
   final TaskEntity task;
   const EditTaskScreen({super.key, required this.task});
 
-  @override
+  @override 
   State<EditTaskScreen> createState() => _EditTaskScreenState();
 }
 
@@ -32,12 +33,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         onPressed: () {
           widget.task.name = _controller.text;
           widget.task.priority = widget.task.priority;
-          if (widget.task.isInBox) {
-            widget.task.save();
-          } else {
-            final Box<TaskEntity> box = Hive.box(taskBoxName);
-            box.add(widget.task);
-          }
+        final repository =Provider.of<Repository<TaskEntity>>(context,listen: false);
+        repository.createOrUpdate(widget.task);
           Navigator.of(context).pop();
         },
         label: const Row(

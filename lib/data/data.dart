@@ -4,13 +4,14 @@ part 'data.g.dart';
 
 @HiveType(typeId: 1)
 class TaskEntity extends HiveObject {
+  int id = -1;
   @HiveField(0)
   String name = '';
   @HiveField(1)
   bool isComplited = false;
   @HiveField(2)
   Priority priority = Priority.low;
-}
+} 
 
 @HiveType(typeId: 2)
 enum Priority {
