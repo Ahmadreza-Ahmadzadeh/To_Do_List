@@ -1,16 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do_list/data/data.dart';
 import 'package:to_do_list/data/repo/repository.dart';
 import 'package:to_do_list/main.dart';
 import 'package:to_do_list/screens/edit/edit.dart';
+import 'package:to_do_list/screens/home/bloc/task_list_bloc.dart';
 import 'package:to_do_list/widgets.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
   final TextEditingController controller = TextEditingController();
-  final ValueNotifier<String> searchKeywordNotifier = ValueNotifier('');
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
@@ -38,102 +39,103 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              height: 110,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    themeData.colorScheme.primary,
-                    themeData.colorScheme.primaryVariant
-                  ],
+      body: BlocProvider<TaskListBloc>(
+        create: (context) =>
+            TaskListBloc(context.read<Repository<TaskEntity>>()),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                height: 110,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      themeData.colorScheme.primary,
+                      themeData.colorScheme.primaryVariant
+                    ],
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'To Do List',
-                          style: themeData.textTheme.headline6!
-                              .apply(color: Colors.white),
-                        ),
-                        Image.asset(
-                          'assets/share.png',
-                          height: 30,
-                          width: 30,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Container(
-                      height: 38,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(19),
-                        color: themeData.colorScheme.onPrimary,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                          )
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'To Do List',
+                            style: themeData.textTheme.headline6!
+                                .apply(color: Colors.white),
+                          ),
+                          Image.asset(
+                            'assets/share.png',
+                            height: 30,
+                            width: 30,
+                          ),
                         ],
                       ),
-                      child: TextField(
-                        controller: controller,
-                        onChanged: (value) {
-                          searchKeywordNotifier.value = controller.text;
-                        },
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(CupertinoIcons.search),
-                          label: Text('Search tasks ...'),
-                        ),
+                      const SizedBox(
+                        height: 14,
                       ),
-                    )
-                  ],
+                      Container(
+                        height: 38,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(19),
+                          color: themeData.colorScheme.onPrimary,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                            )
+                          ],
+                        ),
+                        child: TextField(
+                          controller: controller,
+                          onChanged: (value) {
+                            context
+                                .read<TaskListBloc>()
+                                .add(TaskListSearch(value));
+                          },
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(CupertinoIcons.search),
+                            label: Text('Search tasks ...'),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: ValueListenableBuilder<String>(
-                valueListenable: searchKeywordNotifier,
-                builder: (
-                  context,
-                  value,
-                  child,
-                ) {
-                  return Consumer<Repository<TaskEntity>>(
-                    builder: (context, repository, child) {
-                      return FutureBuilder<List<TaskEntity>>(
-                        future:
-                            repository.getAll(searchKeyword: controller.text),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            if (snapshot.data!.isNotEmpty) {
-                              return TaskList(
-                                items: snapshot.data!,
-                                themeData: themeData,
-                              );
-                            } else {
-                              return const EmptyState();
-                            }
-                          } else {
-                            return const CircularProgressIndicator();
-                          }
-                        },
-                      );
+              Expanded(
+                child: Consumer<Repository<TaskEntity>>(
+
+                  builder:(context,model,child) {
+                    context.read<TaskListBloc>().add(TaskListStarted());
+                    return BlocBuilder<TaskListBloc, TaskListState>(
+                    builder: (context, state) {
+                      if (state is TaskListSuccess) {
+                        return TaskList(items: state.items, themeData: themeData);
+                      } else if (state is TaskListEmpty) {
+                        return const EmptyState();
+                      } else if (state is TaskListLoading ||
+                          state is TaskListInitial) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (state is TaskListError) {
+                        return Center(
+                          child: Text(state.errorMesssage),
+                        );
+                      } else {
+                        throw Exception('State is not valid ...');
+                      }
                     },
                   );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -185,10 +187,7 @@ class TaskList extends StatelessWidget {
                   elevation: 0,
                   textColor: secondaryTextColor,
                   onPressed: () {
-                    final taskRepository = Provider.of<Repository<TaskEntity>>(
-                        context,
-                        listen: false);
-                    taskRepository.deleteAll();
+                    context.read<TaskListBloc>().add(TaskListDeleteAll());
                   },
                   child: const Row(
                     children: [
@@ -256,7 +255,7 @@ class _TaskItemState extends State<TaskItem> {
         final taskRepository =
             Provider.of<Repository<TaskEntity>>(context, listen: false);
         taskRepository.delete(widget.task);
-      }, 
+      },
       child: Container(
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.only(left: 16, right: 16),
